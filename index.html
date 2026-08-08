@@ -34,8 +34,7 @@
   <script>
     async function checkEligibility() {
       const cgpa = document.getElementById("cgpaInput").value;
-      const response = await fetch(`http://localhost:5000/check-eligibility?cgpa=${cgpa}`);
-      const companies = await response.json();
+const response = await fetch(`https://placement-eligibility-checker-7v7n.onrender.com/check-eligibility?cgpa=${cgpa}`);      const companies = await response.json();
 
       const resultsDiv = document.getElementById("results");
       resultsDiv.innerHTML = "";
