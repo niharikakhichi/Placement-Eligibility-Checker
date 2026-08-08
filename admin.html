@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin - Manage Companies</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 500px;
+      margin: 50px auto;
+      padding: 20px;
+    }
+    input, button {
+      padding: 8px;
+      margin: 5px 0;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Admin: Add a Company</h2>
+  <input type="text" id="companyName" placeholder="Company Name">
+  <input type="number" id="companyMinCgpa" placeholder="Minimum CGPA" step="0.1">
+  <button onclick="addCompany()">Add Company</button>
+
+  <p id="addStatus"></p>
+
+  <script>
+    async function addCompany() {
+      const name = document.getElementById("companyName").value;
+      const minCgpa = Number(document.getElementById("companyMinCgpa").value);
+
+      if (!name || !minCgpa) {
+        document.getElementById("addStatus").innerText = "Please fill both fields.";
+        return;
+      }
+
+      const response = await fetch("http://localhost:5000/add-company", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ name, minCgpa })
+      });
+
+      const data = await response.json();
+      document.getElementById("addStatus").innerText = data.message || "Company added!";
+
+      document.getElementById("companyName").value = "";
+      document.getElementById("companyMinCgpa").value = "";
+    }
+  </script>
+
+</body>
+</html>

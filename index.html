@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Placement Eligibility Checker</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 500px;
+      margin: 50px auto;
+      padding: 20px;
+    }
+    input, button {
+      padding: 8px;
+      margin: 5px 0;
+      width: 100%;
+    }
+    .company {
+      background: #f0f0f0;
+      padding: 10px;
+      margin: 5px 0;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Check Your Eligibility</h2>
+  <input type="number" id="cgpaInput" placeholder="Enter your CGPA" step="0.1">
+  <button onclick="checkEligibility()">Check</button>
+
+  <div id="results"></div>
+
+  <script>
+    async function checkEligibility() {
+      const cgpa = document.getElementById("cgpaInput").value;
+      const response = await fetch(`http://localhost:5000/check-eligibility?cgpa=${cgpa}`);
+      const companies = await response.json();
+
+      const resultsDiv = document.getElementById("results");
+      resultsDiv.innerHTML = "";
+
+      if (companies.length === 0) {
+        resultsDiv.innerHTML = "<p>No companies match your CGPA.</p>";
+        return;
+      }
+
+      companies.forEach(company => {
+        resultsDiv.innerHTML += `<div class="company">${company.name} (Min CGPA: ${company.minCgpa})</div>`;
+      });
+    }
+  </script>
+
+</body>
+</html>
