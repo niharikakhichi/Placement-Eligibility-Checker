@@ -25,29 +25,36 @@
 </head>
 <body>
 
-  <h2>Check Your Eligibility</h2>
-  <input type="number" id="cgpaInput" placeholder="Enter your CGPA" step="0.1">
-  <button onclick="checkEligibility()">Check</button>
+<h2>Check Your Eligibility</h2>
+<input type="number" id="cgpaInput" placeholder="Enter your CGPA" step="0.1">
+<input type="text" id="branchInput" placeholder="Enter your Branch (e.g., CSE)">
+<input type="number" id="backlogsInput" placeholder="Enter number of backlogs" value="0">
+<button onclick="checkEligibility()">Check</button>
 
-  <div id="results"></div>
+<div id="results"></div>
 
-  <script>
-    async function checkEligibility() {
-      const cgpa = document.getElementById("cgpaInput").value;
-const response = await fetch(`https://placement-eligibility-checker-7v7n.onrender.com/check-eligibility?cgpa=${cgpa}`);      const companies = await response.json();
+<script>
+  async function checkEligibility() {
+    const cgpa = document.getElementById("cgpaInput").value;
+    const branch = document.getElementById("branchInput").value;
+    const backlogs = document.getElementById("backlogsInput").value;
 
-      const resultsDiv = document.getElementById("results");
-      resultsDiv.innerHTML = "";
+    const response = await fetch(`http://localhost:5000/check-eligibility?cgpa=${cgpa}&branch=${branch}&backlogs=${backlogs}`);
+    const companies = await response.json();
 
-      if (companies.length === 0) {
-        resultsDiv.innerHTML = "<p>No companies match your CGPA.</p>";
-        return;
-      }
+    const resultsDiv = document.getElementById("results");
+    resultsDiv.innerHTML = "";
 
-      companies.forEach(company => {
-        resultsDiv.innerHTML += `<div class="company">${company.name} (Min CGPA: ${company.minCgpa})</div>`;
-      });
+    if (companies.length === 0) {
+      resultsDiv.innerHTML = "<p>No companies match your criteria.</p>";
+      return;
     }
+
+    companies.forEach(company => {
+      resultsDiv.innerHTML += `<div class="company">${company.name} (Min CGPA: ${company.minCgpa}, Branches: ${company.allowedBranches.join(", ")})</div>`;
+    });
+  }
+
   </script>
 
 </body>

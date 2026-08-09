@@ -16,7 +16,9 @@ mongoose.connect(uri)
 
 const companySchema = new mongoose.Schema({
   name: String,
-  minCgpa: Number
+  minCgpa: Number,
+  allowedBranches:[String],
+  maxBacklogs:Number
 });
 
 const Company = mongoose.model("Company", companySchema);
@@ -30,6 +32,10 @@ app.get("/", (req, res) => {
 
 app.post("/add-company", async (req, res) => {
   try {
+    const existing = await Company.findOne({ name: req.body.name });
+    if (existing) {
+      return res.status(400).json({ error: "Company already exists" });
+    }
     const newCompany = new Company(req.body);   // create a new document using your schema
     await newCompany.save();                     // save it to MongoDB
     res.json({ message: "Company added successfully!", company: newCompany });
@@ -40,9 +46,13 @@ app.post("/add-company", async (req, res) => {
 app.get("/check-eligibility", async (req, res) => {
   try {
     const studentCgpa = Number(req.query.cgpa);
-    console.log("Student Cgpa:", studentCgpa);
+    const studentBranch = req.query.branch;
+    const studentBacklogs = Number(req.query.backlogs);
+    console.log("Student :", studentCgpa, studentBranch ,studentBacklogs);
 
-    const eligible = await Company.find({ minCgpa: { $lte: studentCgpa } });
+    const eligible = await Company.find({ minCgpa: { $lte: studentCgpa },
+    allowedBranches : studentBranch,
+  maxBacklogs : {$gte : studentBacklogs} });
     res.json(eligible);
   } catch (err) {
     res.status(500).json({ error: err.message });

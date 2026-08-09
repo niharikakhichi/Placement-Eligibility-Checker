@@ -19,36 +19,43 @@
 </head>
 <body>
 
-  <h2>Admin: Add a Company</h2>
-  <input type="text" id="companyName" placeholder="Company Name">
-  <input type="number" id="companyMinCgpa" placeholder="Minimum CGPA" step="0.1">
-  <button onclick="addCompany()">Add Company</button>
+<h2>Admin: Add a Company</h2>
+<input type="text" id="companyName" placeholder="Company Name">
+<input type="number" id="companyMinCgpa" placeholder="Minimum CGPA" step="0.1">
+<input type="text" id="companyBranches" placeholder="Allowed Branches (comma-separated, e.g., CSE,IT,ECE)">
+<input type="number" id="companyMaxBacklogs" placeholder="Max Backlogs Allowed" value="0">
+<button onclick="addCompany()">Add Company</button>
 
-  <p id="addStatus"></p>
+<p id="addStatus"></p>
 
-  <script>
-    async function addCompany() {
-      const name = document.getElementById("companyName").value;
-      const minCgpa = Number(document.getElementById("companyMinCgpa").value);
+<script>
+  async function addCompany() {
+    const name = document.getElementById("companyName").value;
+    const minCgpa = Number(document.getElementById("companyMinCgpa").value);
+    const branchesInput = document.getElementById("companyBranches").value;
+    const allowedBranches = branchesInput.split(",").map(b => b.trim());
+    const maxBacklogs = Number(document.getElementById("companyMaxBacklogs").value);
 
-      if (!name || !minCgpa) {
-        document.getElementById("addStatus").innerText = "Please fill both fields.";
-        return;
-      }
-
-const response = await fetch("https://placement-eligibility-checker-7v7n.onrender.com/add-company", {        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ name, minCgpa })
-      });
-
-      const data = await response.json();
-      document.getElementById("addStatus").innerText = data.message || "Company added!";
-
-      document.getElementById("companyName").value = "";
-      document.getElementById("companyMinCgpa").value = "";
+    if (!name || !minCgpa || !branchesInput) {
+      document.getElementById("addStatus").innerText = "Please fill all fields.";
+      return;
     }
+
+    const response = await fetch("http://localhost:5000/add-company", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, minCgpa, allowedBranches, maxBacklogs })
+    });
+
+    const data = await response.json();
+    document.getElementById("addStatus").innerText = data.message || data.error || "Company added!";
+
+    document.getElementById("companyName").value = "";
+    document.getElementById("companyMinCgpa").value = "";
+    document.getElementById("companyBranches").value = "";
+    document.getElementById("companyMaxBacklogs").value = "0";
+  }
+
   </script>
 
 </body>
