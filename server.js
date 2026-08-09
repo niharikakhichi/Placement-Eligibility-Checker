@@ -32,6 +32,14 @@ app.get("/", (req, res) => {
 
 app.post("/add-company", async (req, res) => {
   try {
+        const { name, minCgpa, allowedBranches, maxBacklogs } = req.body;
+
+    if (!name || minCgpa == null || !allowedBranches || maxBacklogs == null) {
+      return res.status(400).json({ error: "All fields are required." });
+    }
+    if (minCgpa < 0 || minCgpa > 10) {
+      return res.status(400).json({ error: "CGPA must be between 0 and 10." });
+    }
     const existing = await Company.findOne({ name: req.body.name });
     if (existing) {
       return res.status(400).json({ error: "Company already exists" });
@@ -46,13 +54,23 @@ app.post("/add-company", async (req, res) => {
 app.get("/check-eligibility", async (req, res) => {
   try {
     const studentCgpa = Number(req.query.cgpa);
-    const studentBranch = req.query.branch;
+    const studentBranch = req.query.branch.toUpperCase();
     const studentBacklogs = Number(req.query.backlogs);
+    if (!req.query.cgpa || isNaN(studentCgpa) || studentCgpa < 0 || studentCgpa > 10) {
+      return res.status(400).json({ error: "Please enter a valid CGPA between 0 and 10." });
+    }
+    if (!studentBranch) {
+      return res.status(400).json({ error: "Branch is required." });
+    }
+    if (req.query.backlogs === undefined || isNaN(studentBacklogs) || studentBacklogs < 0) {
+      return res.status(400).json({ error: "Please enter a valid number of backlogs (0 or more)." });
+    }
     console.log("Student :", studentCgpa, studentBranch ,studentBacklogs);
 
-    const eligible = await Company.find({ minCgpa: { $lte: studentCgpa },
-    allowedBranches : studentBranch,
-  maxBacklogs : {$gte : studentBacklogs} });
+    const eligible = await Company.find({ 
+      minCgpa: { $lte: studentCgpa },
+      allowedBranches: { $regex: new RegExp(`^${studentBranch}$`, "i") },
+      maxBacklogs : {$gte : studentBacklogs} });
     res.json(eligible);
   } catch (err) {
     res.status(500).json({ error: err.message });
